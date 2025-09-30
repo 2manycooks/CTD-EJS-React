@@ -1,20 +1,15 @@
 export default function Header({ errors = [], info = [] }) {
 	return (
-		<header style={{ padding: "1rem 0" }}>
-			<h1>Secret Word – React</h1>
+		<header>
+			<h1> Secret Word - REACT VERSION </h1>
 			<div>
-				{errors.map((e, i) => (
-					<div key={`e-${i}`} style={{ color: "#b91c1c" }}>
-						Error: {e}
-					</div>
+				{errors.map((error, index) => (
+					<div key={`error-${index}`}> Error: {error} </div>
 				))}
-				{info.map((m, i) => (
-					<div key={`i-${i}`} style={{ color: "#1d4ed8" }}>
-						Info: {m}
-					</div>
+				{info.map((e, i) => (
+					<div key={`error-${i}`}> Info: {e} </div>
 				))}
 			</div>
-			<hr />
 		</header>
 	);
 }

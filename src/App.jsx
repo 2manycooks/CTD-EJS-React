@@ -1,20 +1,22 @@
-import React, { useEffect, useState } from "react";
-import Header from "./components/Header.jsx";
-import Footer from "./components/Footer.jsx";
-import { getSecretWord, setSecretWord } from "./lib/secretSource.js";
+import { useState, useEffect } from "react";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import { getSecretWord, setSecretWord } from "./lib/secretSource";
+import "./App.css";
 
-export default function App() {
-	const [secretWord, setWord] = useState("");
+function App() {
+	const [secretWord, setSecretWord] = useState("");
 	const [input, setInput] = useState("");
 	const [errors, setErrors] = useState([]);
 	const [info, setInfo] = useState([]);
 	const [loading, setLoading] = useState(false);
 
+	// resets all values to be empty when opening/reloadig page.
 	async function load() {
 		setLoading(true);
 		try {
 			const data = await getSecretWord();
-			setWord(data.secretWord || "");
+			setSecretWord(data.secretWord || "");
 			setErrors(Array.isArray(data.errors) ? data.errors : []);
 			setInfo(Array.isArray(data.info) ? data.info : []);
 			setInput("");
@@ -25,7 +27,7 @@ export default function App() {
 		}
 	}
 
-	async function submit() {
+	async function handleSubmit() {
 		if (!input) return;
 		setLoading(true);
 		try {
@@ -41,44 +43,36 @@ export default function App() {
 		}
 	}
 
-	useEffect(() => {
-		load();
-	}, []);
+	// useEffect(() => {
+	// 	load(), [];
+	// });
 
 	return (
-		<div style={{ maxWidth: 680, margin: "0 auto", padding: "1rem" }}>
+		<>
 			<Header errors={errors} info={info} />
 
-			<main>
-				<h2>Secret Word</h2>
-				{loading ? (
-					<p>Loading…</p>
-				) : (
-					<>
-						<p>
-							The secret word is: <b>{secretWord}</b>
-						</p>
-						<p>Would you like to change it?</p>
-						<div style={{ display: "flex", gap: 8 }}>
-							<input
-								name="secretWord"
-								value={input}
-								onChange={(e) => setInput(e.target.value)}
-								placeholder="Enter new secret word"
-								style={{ flex: "0 1 280px", padding: "0.5rem" }}
-							/>
-							<button onClick={submit} disabled={!input || loading}>
-								Submit
-							</button>
-							<button onClick={load} disabled={loading}>
-								Refresh
-							</button>
-						</div>
-					</>
-				)}
-			</main>
+			<div>
+				<h2>Secret Word:</h2>
+
+				<>
+					<p>The secret word is: {secretWord}</p>
+					<p>Change the secret word here:</p>
+					<form>
+						<input
+							name="secretWord"
+							value={input}
+							onChange={(e) => setInput(e.target.value)}
+							placeholder="Enter secret word"
+						/>
+					</form>
+					<button onClick={handleSubmit}>Submit</button>
+					<button onClick={load}>Refresh</button>
+				</>
+			</div>
 
 			<Footer />
-		</div>
+		</>
 	);
 }
+
+export default App;
