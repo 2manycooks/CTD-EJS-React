@@ -1,35 +1,84 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from "react";
+import Header from "./components/Header.jsx";
+import Footer from "./components/Footer.jsx";
+import { getSecretWord, setSecretWord } from "./lib/secretSource.js";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+	const [secretWord, setWord] = useState("");
+	const [input, setInput] = useState("");
+	const [errors, setErrors] = useState([]);
+	const [info, setInfo] = useState([]);
+	const [loading, setLoading] = useState(false);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+	async function load() {
+		setLoading(true);
+		try {
+			const data = await getSecretWord();
+			setWord(data.secretWord || "");
+			setErrors(Array.isArray(data.errors) ? data.errors : []);
+			setInfo(Array.isArray(data.info) ? data.info : []);
+			setInput("");
+		} catch (err) {
+			setErrors([err.message]);
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	async function submit() {
+		if (!input) return;
+		setLoading(true);
+		try {
+			const data = await setSecretWord(input);
+			setWord(data.secretWord || "");
+			setErrors(Array.isArray(data.errors) ? data.errors : []);
+			setInfo(Array.isArray(data.info) ? data.info : []);
+			setInput("");
+		} catch (err) {
+			setErrors([err.message]);
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	useEffect(() => {
+		load();
+	}, []);
+
+	return (
+		<div style={{ maxWidth: 680, margin: "0 auto", padding: "1rem" }}>
+			<Header errors={errors} info={info} />
+
+			<main>
+				<h2>Secret Word</h2>
+				{loading ? (
+					<p>Loading…</p>
+				) : (
+					<>
+						<p>
+							The secret word is: <b>{secretWord}</b>
+						</p>
+						<p>Would you like to change it?</p>
+						<div style={{ display: "flex", gap: 8 }}>
+							<input
+								name="secretWord"
+								value={input}
+								onChange={(e) => setInput(e.target.value)}
+								placeholder="Enter new secret word"
+								style={{ flex: "0 1 280px", padding: "0.5rem" }}
+							/>
+							<button onClick={submit} disabled={!input || loading}>
+								Submit
+							</button>
+							<button onClick={load} disabled={loading}>
+								Refresh
+							</button>
+						</div>
+					</>
+				)}
+			</main>
+
+			<Footer />
+		</div>
+	);
 }
-
-export default App
